@@ -1,4 +1,4 @@
-# MCP Architecture Diagram: Retail RAG System Tool Integration (Mermaid)
+# MCP Architecture Diagram: Retail RAG System Tool Integration (Mermaid, with ADK)
 
 ```mermaid
 flowchart TB
@@ -6,6 +6,11 @@ flowchart TB
     GW[API Gateway / App]
     AUTH[AuthN/Z & Consent]
     SESS[Session & Context Store]
+  end
+
+  subgraph ADK[Google ADK]
+    AG[RetailRAGAgent/Workflows]
+    TOOLS[ADK Tools: VectorSearch, Generate, MCP Tool Wrappers]
   end
 
   subgraph Protocol[MCP Protocol]
@@ -17,21 +22,27 @@ flowchart TB
 
   subgraph Servers[MCP Servers]
     REG[Tool Registry & Routing]
-    SRV1[Server: product_search]
-    SRV2[Server: inventory_check]
-    SRV3[Server: policy_qa]
-    SRV4[Server: analytics_query]
+    SRV1[product_search]
+    SRV2[inventory_check]
+    SRV3[policy_qa]
+    SRV4[analytics_query]
     LOG[Observability: Logs/Metrics/Tracing]
   end
 
-  subgraph Data[External Systems / Data]
-    CAT[Catalog & Vector Store]
+  subgraph Data[External / Data Systems]
+    CAT[ChromaDB (Vectors)]
     INV[Inventory/Orders]
     POL[Policies/FAQs]
     DWH[Analytics Warehouse]
+    OLM[Ollama (Gemma3:270m)]
   end
 
-  GW --> AUTH --> SESS --> INIT --> REG
+  GW --> AUTH --> SESS --> AG
+  AG --> TOOLS
+  TOOLS --> OLM
+  TOOLS --> CAT
+  TOOLS --> REG
+  GW --> INIT --> REG
   REG --> CALL --> SRV1 & SRV2 & SRV3 & SRV4
   SRV1 --> CAT
   SRV2 --> INV
