@@ -1,4 +1,4 @@
-# Gemma3:270m Integration and Optimization Architecture (Mermaid)
+# Gemma3:270m Integration and Optimization Architecture (Mermaid, with ADK Tools)
 
 ```mermaid
 flowchart LR
@@ -10,24 +10,23 @@ flowchart LR
     MON[Latency/Throughput Metrics]
   end
 
-  subgraph Tasks[Task Routing]
-    T1[Generation\n(answers, summaries)]
-    T2[Query Rewriting]
-    T3[Classification\n(intent/sentiment)]
-    T4[Embedding\n(query/doc)]
+  subgraph ADKTools[ADK Tools]
+    GT[GenerateTool]
+    VT[VectorSearchTool]
   end
 
   subgraph Opt[Optimization]
-    O1[Quantization\n(INT8/4)]
-    O2[PEFT (LoRA/QLoRA)\n(if supported)]
-    O3[Distillation\n(from larger teacher)]
+    O1[Quantization (INT8/4)]
+    O2[PEFT (LoRA/QLoRA) if supported]
+    O3[Distillation (teacher→SLM)]
     O4[Batching/Concurrency]
   end
 
-  EP1 --> T1 & T2 & T3
-  EP2 --> T4
-  T1 & T2 & T3 & T4 --> CACH
+  GT --> EP1
+  VT --> EP2
+  EP1 --> CACH
+  EP2 --> CACH
   M --> O1 & O2
-  T1 & T2 & T3 & T4 --> O4
+  GT & VT --> O4
   M --> MON
 ```
