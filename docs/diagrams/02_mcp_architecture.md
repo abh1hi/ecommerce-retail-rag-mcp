@@ -1,14 +1,43 @@
-# MCP Architecture Diagram: Retail RAG System Tool Integration
+# MCP Architecture Diagram: Retail RAG System Tool Integration (Mermaid)
 
-![MCP Architecture](../charts/mcp_architecture.png)
+```mermaid
+flowchart TB
+  subgraph Host[Host / Client Layer]
+    GW[API Gateway / App]
+    AUTH[AuthN/Z & Consent]
+    SESS[Session & Context Store]
+  end
 
-## Description
-Shows the full MCP protocol stack:
-- Host/client layer (API gateway, request auth)
-- Protocol message flow (init, tool call, response, error)
-- MCP server registry, session/context store
-- Per-tool servers (product_search, inventory_check, policy_qa, analytics_query)
-- Security boundaries (auth, RBAC)
-- Data sources and system integrations
-- Logging and error handling
-- Arrows illustrate flow of consent, data, requests between layers.
+  subgraph Protocol[MCP Protocol]
+    INIT[Initialize]
+    CALL[Tool Call]
+    RESP[Tool Response]
+    ERR[Error/Retry]
+  end
+
+  subgraph Servers[MCP Servers]
+    REG[Tool Registry & Routing]
+    SRV1[Server: product_search]
+    SRV2[Server: inventory_check]
+    SRV3[Server: policy_qa]
+    SRV4[Server: analytics_query]
+    LOG[Observability: Logs/Metrics/Tracing]
+  end
+
+  subgraph Data[External Systems / Data]
+    CAT[Catalog & Vector Store]
+    INV[Inventory/Orders]
+    POL[Policies/FAQs]
+    DWH[Analytics Warehouse]
+  end
+
+  GW --> AUTH --> SESS --> INIT --> REG
+  REG --> CALL --> SRV1 & SRV2 & SRV3 & SRV4
+  SRV1 --> CAT
+  SRV2 --> INV
+  SRV3 --> POL
+  SRV4 --> DWH
+  SRV1 & SRV2 & SRV3 & SRV4 --> RESP --> GW
+  SRV1 & SRV2 & SRV3 & SRV4 --> LOG
+  CALL --> ERR --> CALL
+```
