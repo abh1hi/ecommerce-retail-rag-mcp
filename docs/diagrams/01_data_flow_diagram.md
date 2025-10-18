@@ -1,4 +1,4 @@
-# Data Flow Diagram: E-commerce RAG Pipeline (Mermaid)
+# Data Flow Diagram: E-commerce RAG Pipeline (Mermaid, with ADK)
 
 ```mermaid
 flowchart LR
@@ -6,13 +6,19 @@ flowchart LR
     U[User Query]
   end
 
-  subgraph API
-    N[Normalization & Lang Detect]
+  subgraph ADK[Google ADK Orchestration]
+    AG[RetailRAGAgent (Sequential)]
+    VS[VectorSearchTool]
+    GT[GenerateTool]
+  end
+
+  subgraph API[FastAPI MCP Server]
+    N[Normalize/Lang Detect]
     JR[Join Runtime Context]
   end
 
   subgraph Embedding
-    E[Gemma3:270m (Ollama)\nQuery Embedding]
+    E[embed_text\n(Ollama Gemma3 embeddings or\nsentence-embedder)]
   end
 
   subgraph VectorDB[ChromaDB]
@@ -25,7 +31,7 @@ flowchart LR
   end
 
   subgraph Gen[Generation]
-    G[Gemma3:270m (Ollama)\nGrounded Answer]
+    G[Ollama Gemma3:270m\nGrounded Answer]
   end
 
   subgraph MCP[MCP Tool Layer]
@@ -35,11 +41,13 @@ flowchart LR
     T4[analytics_query]
   end
 
-  U --> N --> E --> Q --> R --> C --> G -->|Response| U
+  U --> AG --> N --> E --> Q --> R --> C --> G -->|Response| U
+  AG -.calls.-> VS
+  AG -.calls.-> GT
   C -->|Insufficient Context?| D{Enough Context?}
   D -- No --> T1 & T2 & T3 & T4 --> JR --> C
   D -- Yes --> G
 
   classDef stage fill:#eef,stroke:#88f,stroke-width:1px;
-  class API,Embedding,VectorDB,Augment,Gen,MCP stage;
+  class ADK,API,Embedding,VectorDB,Augment,Gen,MCP stage;
 ```
