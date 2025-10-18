@@ -1,4 +1,4 @@
-# ChromaDB Schema and Data Ingestion Architecture (Mermaid)
+# ChromaDB Schema and Data Ingestion Architecture (Mermaid, with ADK VectorSearchTool)
 
 ```mermaid
 flowchart TB
@@ -17,7 +17,7 @@ flowchart TB
   end
 
   subgraph Embed[Embedding]
-    E1[Gemma3:270m (or sentence-embedder)\nVectorize Chunks]
+    E1[embed_text\n(Ollama Gemma or sentence-embedder)\nVectorize Chunks]
   end
 
   subgraph Chroma[ChromaDB Collections]
@@ -27,7 +27,7 @@ flowchart TB
     CC4[ticket_chunks\nid, embedding, customer_id, lang, text]
   end
 
-  subgraph Query[Query Processing]
+  subgraph Query[ADK VectorSearchTool]
     Q1[Query Embedding]
     Q2[KNN + Filters]
     Q3[Rerank/Score Merge]
