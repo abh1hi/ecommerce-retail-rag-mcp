@@ -1,0 +1,12 @@
+chromadb
+fastapi
+uvicorn[standard]
+requests
+pydantic
+python-dotenv
+httpx
+pytest
+pytest-asyncio
+flake8
+black
+mypy
